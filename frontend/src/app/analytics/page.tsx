@@ -206,9 +206,9 @@ export default function AnalyticsDashboard() {
                      <Clock className="w-5 h-5" />}
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-slate-200">{evt.extracted_json?.action || evt.extracted_json?.activity_phrase || "Unknown Activity"}</h4>
+                    <h4 className="text-sm font-medium text-slate-200">{evt.matched_node_name || evt.extracted_json?.action || evt.extracted_json?.activity_phrase || "Unknown Activity"}</h4>
                     <p className="text-xs text-slate-500">
-                      Discipline: {evt.extracted_json?.discipline || "Unknown"} • Match Confidence: {(evt.confidence * 100).toFixed(0)}%
+                      Discipline: {evt.matched_discipline || evt.extracted_json?.discipline || "Unknown"} • Match Confidence: {(evt.confidence * 100).toFixed(0)}%
                     </p>
                   </div>
                 </div>
