@@ -138,8 +138,8 @@ def list_needs_review():
 
 @app.get("/schedule-graph")
 def get_schedule_graph():
-    # Fetch all events to map exact statuses and percent complete
-    all_events = get_events()
+    # Fetch LIVE events only — historical seed data must not affect DAG node coloring
+    all_events = get_events(source_filter="live")
     node_status_map = {}
     node_percent_map = {}
     
@@ -152,7 +152,7 @@ def get_schedule_graph():
                 node_percent_map[nid] = max(node_percent_map.get(nid, 0.0), e.get("percent_complete"))
             
     graph_data = matcher_service.schedule
-    # Annotate nodes with exact status
+    # Annotate nodes with live status only
     annotated_nodes = []
     for node in graph_data["nodes"]:
         n = node.copy()
@@ -175,10 +175,10 @@ def get_stats():
         d = n.get("discipline", "Unknown")
         total_by_discipline[d] = total_by_discipline.get(d, 0) + 1
         
-    # Get completed nodes
-    confirmed_events = get_events(status_filter="confirmed")
-    auto_updated = get_events(status_filter="auto-updated")
-    completed_node_ids = set([e["matched_node_id"] for e in confirmed_events + auto_updated])
+    # Get completed nodes — LIVE source only, never historical seed data
+    confirmed_events = get_events(status_filter="confirmed", source_filter="live")
+    auto_updated = get_events(status_filter="auto-updated", source_filter="live")
+    completed_node_ids = set([e["matched_node_id"] for e in confirmed_events + auto_updated if e["matched_node_id"]])
     
     completed_by_discipline = {}
     for nid in completed_node_ids:
@@ -199,9 +199,9 @@ def get_stats():
             "total": total
         })
         
-    needs_review = get_events(status_filter="needs-review")
+    needs_review = get_events(status_filter="needs-review", source_filter="live")
     
-    all_events = get_events()
+    all_events = get_events(source_filter="live")
     # Sort descending by id to get newest
     all_events.sort(key=lambda x: x["id"], reverse=True)
     recent_activity = all_events[:5]
