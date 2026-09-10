@@ -49,13 +49,15 @@ def insert_event(raw_phrase: str, extracted_json: Dict[str, Any], matched_node_i
         session.refresh(event)
         return event.id
 
-def get_events(status_filter: Optional[str] = None, source_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_events(status_filter: Optional[str] = None, source_filter: Optional[str] = None, date_filter: Optional[str] = None) -> List[Dict[str, Any]]:
     with Session(engine) as session:
         statement = select(EventAudit)
         if status_filter:
             statement = statement.where(EventAudit.status == status_filter)
         if source_filter:
             statement = statement.where(EventAudit.source == source_filter)
+        if date_filter:
+            statement = statement.where(EventAudit.timestamp.startswith(date_filter))
         
         statement = statement.order_by(EventAudit.id.desc())
         results = session.exec(statement).all()
