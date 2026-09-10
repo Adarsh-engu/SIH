@@ -79,10 +79,14 @@ def get_events(status_filter: Optional[str] = None, source_filter: Optional[str]
         return events
 
 def get_completed_node_ids() -> set:
-    """Return the set of matched_node_ids for all confirmed or auto-updated events."""
+    """Return the set of matched_node_ids for all confirmed or auto-updated LIVE events.
+    Strictly filters source='live' — historical seed data must never satisfy
+    dependency checks for live project reports (Phase 13 integrity requirement).
+    """
     with Session(engine) as session:
         statement = select(EventAudit).where(
-            EventAudit.status.in_(["confirmed", "auto-updated"])
+            EventAudit.status.in_(["confirmed", "auto-updated"]),
+            EventAudit.source == "live"
         )
         results = session.exec(statement).all()
         return {r.matched_node_id for r in results if r.matched_node_id}

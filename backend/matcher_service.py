@@ -150,11 +150,20 @@ class MatcherService:
                 "reasoning": {}
             })
             
+        # Real confidence: use the GNN semantic score for the selected node.
+        # auto-updated (LLM confirmed high certainty): clamp to [0.85, 0.99]
+        # needs-review: clamp to [0.10, 0.79] so confidence varies meaningfully per phrase
+        raw_score = sims_list[self.node_ids.index(selected_id)]
+        if status == "auto-updated":
+            computed_confidence = round(min(0.99, max(0.85, raw_score)), 4)
+        else:
+            computed_confidence = round(min(0.79, max(0.10, raw_score)), 4)
+
         return {
             "matched_node_id": selected_id,
             "matched_node_name": selected_node["name"],
             "discipline": selected_node["discipline"],
-            "confidence": 0.99 if status == "auto-updated" else 0.5,
+            "confidence": computed_confidence,
             "status": status,
             "top_k": top_k_out,
             "reasoning": reasoning
