@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setu WS Test</title>
+</head>
+<body>
+    <h1>Setu WebSocket Test</h1>
+    <p>Waiting for live events...</p>
+    <ul id='messages' style="font-family: monospace; background: #f4f4f4; padding: 10px;">
+    </ul>
+    <script>
+        var ws = new WebSocket("ws://127.0.0.1:8000/ws");
+        ws.onmessage = function(event) {
+            var messages = document.getElementById('messages');
+            var message = document.createElement('li');
+            var content = document.createTextNode(event.data);
+            message.appendChild(content);
+            messages.appendChild(message);
+        };
+    </script>
+</body>
+</html>
