@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from database import init_db, insert_event, get_events, update_event_status, get_completed_node_ids
-from llm_extractor import extract_structured_event
+from llm_extractor import extract_structured_event, OLLAMA_STATUS
 from matcher_service import matcher_service
 import json
 import csv
@@ -220,7 +220,8 @@ def get_stats():
         "completed_tasks": len(completed_node_ids),
         "needs_review_count": len(needs_review),
         "discipline_stats": discipline_stats,
-        "recent_activity": recent_activity
+        "recent_activity": recent_activity,
+        "llm_status": OLLAMA_STATUS,
     }
 
 from datetime import datetime

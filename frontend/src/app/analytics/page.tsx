@@ -29,6 +29,7 @@ type StatsResponse = {
   needs_review_count: number;
   discipline_stats: DisciplineStat[];
   recent_activity: RecentEvent[];
+  llm_status?: { available: boolean; reason: string };
 };
 
 export default function AnalyticsDashboard() {
@@ -75,8 +76,28 @@ export default function AnalyticsDashboard() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Project Analytics</h1>
-          <p className="text-slate-400">High-level insights based on real-time field reporting.</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">Project Analytics</h1>
+              <p className="text-slate-400">High-level insights based on real-time field reporting.</p>
+            </div>
+            {/* LLM Health Badge — visible indicator for demo rehearsal */}
+            {stats.llm_status && (
+              <div
+                title={stats.llm_status.available ? "Ollama LLM is online and serving requests." : stats.llm_status.reason}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  stats.llm_status.available
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${
+                  stats.llm_status.available ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
+                }`} />
+                {stats.llm_status.available ? "LLM Online" : "LLM Offline — GNN fallback active"}
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Top KPIs */}
