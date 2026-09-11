@@ -81,25 +81,14 @@ export default function PlannerDashboard() {
         if (payload.type === "new_report") {
             const newEventData = payload.data;
             if (newEventData.match.status === "needs-review") {
-                // Construct event matching the DB structure returned by GET
-                const newEvent: SetuEvent = {
-                    id: newEventData.event_id,
-                    raw_phrase: newEventData.extracted.raw_phrase || newEventData.match.raw_phrase || "New Event", // Quick mock
-                    extracted_json: newEventData.extracted,
-                    matched_node_id: newEventData.match.matched_node_id,
-                    matched_node_name: newEventData.match.matched_node_name,
-                    matched_discipline: newEventData.match.discipline,
-                    confidence: newEventData.match.confidence,
-                    status: newEventData.match.status,
-                    percent_complete: newEventData.match.percent_complete,
-                    created_at: new Date().toISOString(),
-                    match_reasoning: newEventData.match.reasoning
-                };
-                setEvents((prev) => [newEvent, ...prev]);
+                fetchEvents();
             }
+            // Ensure graph refreshes for auto-updated events
+            setRefreshTrigger((prev) => prev + 1);
         } else if (payload.type === "status_update") {
-            // Remove the item from needs-review queue if it was confirmed or rejected
-            setEvents((prev) => prev.filter(e => e.id !== payload.data.event_id));
+            // Re-fetch the queue so that sequence conflicts for remaining items are dynamically updated
+            fetchEvents();
+            setRefreshTrigger((prev) => prev + 1);
         }
     };
 

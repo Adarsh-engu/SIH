@@ -31,7 +31,7 @@ else:
     logger.info(f"Loaded {len(API_KEYS)} GEMINI API keys successfully.")
 
 def _generate_with_fallback(model_name: str, prompt: str) -> str:
-    """Helper to try generating content with fallback API keys on 429 errors."""
+    """Helper to try generating content with fallback API keys on 429 or key-invalid errors."""
     if not API_KEYS or not genai:
         raise Exception("No API keys or genai client available.")
         
@@ -50,16 +50,25 @@ def _generate_with_fallback(model_name: str, prompt: str) -> str:
             return response.text
         except Exception as e:
             err_str = str(e)
-            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
-                logger.warning(f"Key {key_name} hit 429 quota limit. Rotating to next key if available.")
+            # Rotate on quota exhaustion (429) OR invalid/expired key (400 INVALID_ARGUMENT)
+            should_rotate = (
+                "429" in err_str or
+                "RESOURCE_EXHAUSTED" in err_str or
+                "quota" in err_str.lower() or
+                "INVALID_ARGUMENT" in err_str or
+                "API_KEY_INVALID" in err_str or
+                "API key not valid" in err_str
+            )
+            if should_rotate:
+                logger.warning(f"Key {key_name} failed (quota or invalid key). Rotating to next key if available.")
                 last_exception = e
                 continue
             else:
-                logger.error(f"Key {key_name} encountered non-429 error: {err_str}")
-                raise e # Don't rotate on other errors
+                logger.error(f"Key {key_name} encountered unexpected error: {err_str}")
+                raise e  # Only stop rotation on truly unexpected errors (network, etc.)
                 
-    # If we get here, all keys were exhausted
-    logger.error("All available API keys were exhausted (429 Quota Exceeded).")
+    # If we get here, all keys were exhausted or invalid
+    logger.error("All available API keys failed (quota exhausted or keys invalid).")
     raise last_exception or Exception("All API keys failed.")
 
 

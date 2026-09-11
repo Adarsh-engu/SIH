@@ -134,7 +134,16 @@ def list_events():
 
 @app.get("/needs-review")
 def list_needs_review():
-    return get_events(status_filter="needs-review")
+    events = get_events(status_filter="needs-review")
+    completed_ids = get_completed_node_ids()
+    for e in events:
+        nid = e.get("matched_node_id")
+        if nid:
+            dep_check = matcher_service.check_dependencies(nid, completed_ids)
+            reasoning = e.get("match_reasoning", {})
+            reasoning["dependency_violations"] = dep_check["violations"]
+            e["match_reasoning"] = reasoning
+    return events
 
 @app.get("/schedule-graph")
 def get_schedule_graph():
