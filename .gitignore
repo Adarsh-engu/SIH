@@ -4,10 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
-dist/
-downloads/
 eggs/
 .eggs/
 lib/
@@ -27,8 +24,6 @@ ENV/
 node_modules/
 .next/
 out/
-build/
-dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -43,7 +38,7 @@ backend/.env
 frontend/.env
 frontend/.env.local
 
-# Databases and Secrets
+# Databases
 *.sqlite3
 *.db
 setu.db
@@ -58,7 +53,11 @@ Thumbs.db
 *.swo
 .cursor/
 
-# Temporary / Misc project files
-Tel-Setu_Project_Report_SIH2025.docx
-regression_pair.json
+# Temp / build artifacts
 *.zip
+regression_pair.json
+dist/
+build/
+
+# Explicitly track
+!requirements.txt
