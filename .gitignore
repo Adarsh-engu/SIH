@@ -59,5 +59,9 @@ regression_pair.json
 dist/
 build/
 
-# Explicitly track
+# Docs / text files (ignore all, except project essentials)
+*.txt
+*.md
+*.docx
 !requirements.txt
+!README.md
